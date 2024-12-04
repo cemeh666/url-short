@@ -6,7 +6,7 @@ spring:
   data:
     redis:
       host: ${ENV_REDIS_HOST}
-      port: ${ENV_REDIS_PASSWORD}
+      port: ${ENV_REDIS_PORT}
 
   jpa:
     hibernate:
