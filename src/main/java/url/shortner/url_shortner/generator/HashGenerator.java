@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import url.shortner.url_shortner.entity.Hash;
 import url.shortner.url_shortner.repository.HashRepository;
+import url.shortner.url_shortner.service.HashJdbcRepository;
 
 import java.util.List;
 import java.util.concurrent.Executor;
@@ -16,6 +17,7 @@ import java.util.concurrent.Executors;
 @RequiredArgsConstructor
 public class HashGenerator {
     private final HashRepository hashRepository;
+    private final HashJdbcRepository hashJdbcRepository;
     private final Base62Encoder encoder;
     private final Executor executor = Executors.newSingleThreadExecutor();
 
@@ -30,11 +32,11 @@ public class HashGenerator {
         List<Long> range = hashRepository.getUniqueNumbers(batchSize);
         List<String> hashes = encoder.encode(range);
         executor.execute(() -> {
-            List<Hash> hashesEntity = encoder.encode(range).stream()
-                    .map(Hash::new)
+            List<String> hashesEntity = encoder.encode(range)
+                    .stream()
                     .toList();
 
-            hashRepository.saveAll(hashesEntity);
+            hashJdbcRepository.batchInsert(hashesEntity);
         });
 
         return hashes;
